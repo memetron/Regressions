@@ -15,6 +15,7 @@ def noise(features: np.ndarray, noiseAmt: float):
         noisyFeatures[i] = features[i] * ((1 - noiseAmt) + random.random() * (2 * noiseAmt))
     return noisyFeatures
 
+# generate a linear curve with some noise
 def gen_test_linear(dimension: int, num_cases: int, noiseAmt: float):
     w = np.array([random.random() * 10 for i in range(dimension)])
     b = random.random() * 100 - 50
@@ -26,6 +27,7 @@ def gen_test_linear(dimension: int, num_cases: int, noiseAmt: float):
 
     return (features, noise(labels, noiseAmt))
 
+# generate a polynomial curve with some added noise
 def gen_test_poly(dimension: int, degree: int, num_cases: int, noiseAmt: float):
     w = np.array([random.random() * 10 for i in range(dimension)])
     b = random.random() * 100 - 50
@@ -36,6 +38,7 @@ def gen_test_poly(dimension: int, degree: int, num_cases: int, noiseAmt: float):
         labels[i] = (features[i] ** degree).dot(w) + b
     return (features, noise(labels, noiseAmt))
 
+# splits a set of data into a training and test set
 def split_data(features: np.ndarray, labels: np.ndarray, training_ratio: float):
     num_rows, num_cols = features.shape
     num_training: int = int(training_ratio * num_rows)
@@ -44,24 +47,29 @@ def split_data(features: np.ndarray, labels: np.ndarray, training_ratio: float):
            (features[num_training:, :], labels[num_training:])
 
 def test_linear(dimension: int, numData: int, noiseAmt:float = 0.1):
-    lr1 = LinearRegression(dimension, 0.01)
+    model = LinearRegression(dimension)
 
     (features, labels) = gen_test_linear(dimension, numData, noiseAmt)
     (training, test) = split_data(features, labels, 0.9)
     (trainingFeatures, trainingLabels) = training
     (testFeatures, testLabels) = test
 
-    lr1.train_stochastic(trainingFeatures, trainingLabels)
-    print(f"model = ({lr1.toString()}), "
-          f"e_training={lr1.loss(trainingFeatures, trainingLabels)}, "
-          f"e_test={lr1.loss(testFeatures, testLabels)}")
+    model.train_stochastic(trainingFeatures, trainingLabels)
+    print(f"model = ({model.toString()}), "
+          f"e_training={model.loss(trainingFeatures, trainingLabels)}, "
+          f"e_test={model.loss(testFeatures, testLabels)}")
 
     if dimension == 1: # plot if 2d graph applicable
-        plt.scatter(trainingFeatures, trainingLabels, color='blue', label='Training Data')
-        plt.scatter(testFeatures, testLabels, color='green', label='Test Data')
-        x_values = np.linspace(min(trainingFeatures), max(trainingFeatures), 100).reshape(-1, 1)
-        y_values = lr1.w * x_values + lr1.b
-        plt.plot(x_values, y_values, label=f"y={lr1.w}x+{lr1.b}")
+        normalizedTrainingFeatures = model.normalizer.normalize_features(trainingFeatures)
+        normalizedTrainingLabels = model.normalizer.normalize_labels(trainingLabels)
+        normalizedTestFeatures = model.normalizer.normalize_features(testFeatures)
+        normalizedTestLabels = model.normalizer.normalize_labels(testLabels)
+
+        plt.scatter(normalizedTrainingFeatures, normalizedTrainingLabels, color='blue', label='Training Data')
+        plt.scatter(normalizedTestFeatures, normalizedTestLabels, color='green', label='Test Data')
+        x_values = np.linspace(min(normalizedTrainingFeatures), max(normalizedTrainingFeatures), 100).reshape(-1, 1)
+        y_values = model.w * x_values + model.b
+        plt.plot(x_values, y_values, label=f"y={model.w}x+{model.b}")
         plt.xlabel('X')
         plt.ylabel('Y')
         plt.title('Linear Regression')
@@ -90,5 +98,5 @@ if __name__ == '__main__':
 
     print(f"Starting polynomial test . . .")
     start = time.time()
-    test_poly(5, 2, 100)
+    test_poly(5, 3, 1000)
     print(f"polynomial test finished in {time.time() - start} seconds.")

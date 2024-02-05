@@ -4,19 +4,17 @@ import numpy as np
 import math
 from linearRegression import LinearRegression
 
-
+# wraps a linear regression with a polynomial trainsform of given degree
+# e.g. if your feature vector is originally <x,y> it would become <x,y,x^2,y^2,xy>
+# and the linear model would be trained off the transformed features
 class PolynomialRegression:
-    def __init__(self, numFeatures: int, degree: int, learningRate: float = 0.01):
+    def __init__(self, numFeatures: int, degree: int):
         self.numFeatures = numFeatures
         self.degree = degree
         numPolyFeatures = math.comb(numFeatures + degree, numFeatures) - 1  # find number of unique polynomial terms
-        self._model = LinearRegression(numPolyFeatures, learningRate)
+        self._model = LinearRegression(numPolyFeatures)
 
-        self._normCoefVector = np.ones(numFeatures)
-        self._normOffsetVector = np.zeros(numFeatures)
-        self._normCoefLabel = 1
-        self._normOffsetLabel = 0
-
+    # Wrappers for linear regression functions using a polynomial transform
     def train(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
         self._model.train_stochastic(self._transform_mult(featuresArray), expectedVals)
 
@@ -29,6 +27,7 @@ class PolynomialRegression:
     def toString(self):
         return f"degree={self.degree}, {self._model.toString()}"
 
+    # performs a polynomial transform on a set of feature vectors
     def _transform_mult(self, features: np.ndarray):
         n_samples, n_features = features.shape
         transformed_features = []
@@ -38,6 +37,7 @@ class PolynomialRegression:
                 transformed_features.append(new_feature)
         return np.hstack(transformed_features)
 
+    # performs a polynomial transform on a single feature vector
     def _transform(self, features: np.ndarray):
         if features.ndim == 1:
             features = features.reshape(1, -1)

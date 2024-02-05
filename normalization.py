@@ -1,5 +1,6 @@
 import numpy as np
 
+# simple class to keep information about how data gets normalized / denormalized
 class Normalizer:
     def __init__(self, numFeatures):
         self._normCoefVector = np.ones(numFeatures)
