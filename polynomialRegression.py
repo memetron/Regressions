@@ -16,7 +16,7 @@ class PolynomialRegression:
 
     # Wrappers for linear regression functions using a polynomial transform
     def train(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        self._model.train_stochastic(self._transform_mult(featuresArray), expectedVals)
+        self._model.train_batch(self._transform_mult(featuresArray), expectedVals, 128)
 
     def predict(self, features: np.ndarray):
         return self._model._predict_normalized(self._transform(features))

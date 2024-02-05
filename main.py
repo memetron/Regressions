@@ -47,34 +47,18 @@ def split_data(features: np.ndarray, labels: np.ndarray, training_ratio: float):
            (features[num_training:, :], labels[num_training:])
 
 def test_linear(dimension: int, numData: int, noiseAmt:float = 0.1):
-    model = LinearRegression(dimension)
-
     (features, labels) = gen_test_linear(dimension, numData, noiseAmt)
     (training, test) = split_data(features, labels, 0.9)
     (trainingFeatures, trainingLabels) = training
     (testFeatures, testLabels) = test
 
-    model.train_stochastic(trainingFeatures, trainingLabels)
+    start = time.time()
+    model = LinearRegression(dimension)
+    model.train_batch(trainingFeatures, trainingLabels, 64)
+    print(f"batch 100 trained in {time.time() - start} seconds")
     print(f"model = ({model.toString()}), "
           f"e_training={model.loss(trainingFeatures, trainingLabels)}, "
           f"e_test={model.loss(testFeatures, testLabels)}")
-
-    if dimension == 1: # plot if 2d graph applicable
-        normalizedTrainingFeatures = model.normalizer.normalize_features(trainingFeatures)
-        normalizedTrainingLabels = model.normalizer.normalize_labels(trainingLabels)
-        normalizedTestFeatures = model.normalizer.normalize_features(testFeatures)
-        normalizedTestLabels = model.normalizer.normalize_labels(testLabels)
-
-        plt.scatter(normalizedTrainingFeatures, normalizedTrainingLabels, color='blue', label='Training Data')
-        plt.scatter(normalizedTestFeatures, normalizedTestLabels, color='green', label='Test Data')
-        x_values = np.linspace(min(normalizedTrainingFeatures), max(normalizedTrainingFeatures), 100).reshape(-1, 1)
-        y_values = model.w * x_values + model.b
-        plt.plot(x_values, y_values, label=f"y={model.w}x+{model.b}")
-        plt.xlabel('X')
-        plt.ylabel('Y')
-        plt.title('Linear Regression')
-        plt.legend()
-        plt.show()
 
 def test_poly(dimension: int, degree: int, numData: int, noiseAmt:float = 0.1):
     model = PolynomialRegression(dimension, degree)
@@ -92,11 +76,11 @@ def test_poly(dimension: int, degree: int, numData: int, noiseAmt:float = 0.1):
 if __name__ == '__main__':
     print(f"Starting linear test . . .")
     start = time.time()
-    test_linear(1, 1000)
+    test_linear(5, 10000)
     print(f"Linear test finished in {time.time() - start} seconds.")
 
 
     print(f"Starting polynomial test . . .")
     start = time.time()
-    test_poly(5, 3, 1000)
+    test_poly(5, 2, 10000)
     print(f"polynomial test finished in {time.time() - start} seconds.")
