@@ -1,54 +1,36 @@
 import numpy as np
-
+from normalization import Normalizer
 
 class LinearRegression:
     def __init__(self, numFeatures: int, learningRate: float = 0.01):
         self.w = np.zeros(numFeatures)
         self.b = 0
         self.learningRate = learningRate
-
-        self._normCoefVector = np.ones(numFeatures)
-        self._normOffsetVector = np.zeros(numFeatures)
-        self._normCoefLabel = 1
-        self._normOffsetLabel = 0
+        self.normalizer = Normalizer(numFeatures)
 
     def toString(self):
         return f"w = {self.w} b = {self.b}"
 
     def predict(self, features: np.ndarray):
-        return self._denormalize_label(self._predict_normalized(features))
+        return self.normalizer.denormalize_label(self._predict_normalized(features))
 
     def _predict_normalized(self, features: np.ndarray):
-        return self.w.dot(self._normalize_features(features)) + self.b
+        return self.w.dot(features) + self.b
+        # return self.w.dot(self._normalize_features(features)) + self.b
 
     def loss(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
         l = 0
         num_rows, num_cols = featuresArray.shape
-        expectedVals = self._normalize_labels(expectedVals)
+        expectedVals = self.normalizer.normalize_labels(expectedVals)
+        featuresArray = self.normalizer.normalize_features(featuresArray)
         for i in range(num_rows):
             l += (self._predict_normalized(featuresArray[i, :]) - expectedVals[i]) ** 2
         return l / num_rows
 
-    def _init_normalization_parameters(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        self._normCoefLabel = 1 / (np.max(expectedVals) - np.min(expectedVals))
-        self._normOffsetLabel = (-1) * np.min(expectedVals) * self._normCoefLabel
-
-        self._normCoefVector = 1 / (np.max(featuresArray, axis=0) - np.min(featuresArray, axis=0))
-        self._normOffsetVector = (-1) *  np.min(featuresArray, axis=0) * self._normCoefVector
-
-    def _normalize_features(self, featuresArray: np.ndarray):
-        return featuresArray * self._normCoefVector + self._normOffsetVector
-
-    def _normalize_labels(self, labels):
-        return labels * self._normCoefLabel + self._normOffsetLabel
-
-    def _denormalize_label(self, label):
-        return (label - self._normOffsetLabel) / self._normCoefLabel
-
     def train(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        self._init_normalization_parameters(featuresArray, expectedVals)
-        featuresArray = self._normalize_features(featuresArray)
-        expectedVals = self._normalize_labels(expectedVals)
+        self.normalizer.init_normalization_parameters(featuresArray, expectedVals)
+        featuresArray = self.normalizer.normalize_features(featuresArray)
+        expectedVals = self.normalizer.normalize_labels(expectedVals)
 
         num_rows, num_cols = featuresArray.shape
         while True:
@@ -68,10 +50,10 @@ class LinearRegression:
             self.b = self.b - self.learningRate * db / num_rows
 
     def train_stochastic(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        self._init_normalization_parameters(featuresArray, expectedVals)
+        self.normalizer.init_normalization_parameters(featuresArray, expectedVals)
         num_rows, num_cols = featuresArray.shape
-        featuresArray = self._normalize_features(featuresArray)
-        expectedVals = self._normalize_labels(expectedVals)
+        featuresArray = self.normalizer.normalize_features(featuresArray)
+        expectedVals = self.normalizer.normalize_labels(expectedVals)
         while True:
             prev_w = self.w
             prev_b = self.b

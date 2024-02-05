@@ -46,7 +46,7 @@ def split_data(features: np.ndarray, labels: np.ndarray, training_ratio: float):
 def test_linear(dimension: int, numData: int, noiseAmt:float = 0.1):
     lr1 = LinearRegression(dimension, 0.01)
 
-    (features, labels) = gen_test_poly(dimension, 2, numData, noiseAmt)
+    (features, labels) = gen_test_linear(dimension, numData, noiseAmt)
     (training, test) = split_data(features, labels, 0.9)
     (trainingFeatures, trainingLabels) = training
     (testFeatures, testLabels) = test
@@ -82,11 +82,11 @@ def test_poly(dimension: int, degree: int, numData: int, noiseAmt:float = 0.1):
 
 
 if __name__ == '__main__':
-    # print(f"Starting linear test . . .")
-    # start = time.time()
-    # test_linear(1, 1000)
-    # print(f"Linear test finished in {time.time() - start} seconds.")
-    #
+    print(f"Starting linear test . . .")
+    start = time.time()
+    test_linear(1, 1000)
+    print(f"Linear test finished in {time.time() - start} seconds.")
+
 
     print(f"Starting polynomial test . . .")
     start = time.time()

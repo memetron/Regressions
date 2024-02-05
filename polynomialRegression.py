@@ -18,19 +18,12 @@ class PolynomialRegression:
         self._normOffsetLabel = 0
 
     def train(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        self._init_normalization_parameters(featuresArray, expectedVals)
-        featuresArray = self._normalize_features(featuresArray)
-        expectedVals = self._normalize_labels(expectedVals)
         self._model.train_stochastic(self._transform_mult(featuresArray), expectedVals)
 
     def predict(self, features: np.ndarray):
-        features = self._normalize_features(features)
-        return self._denormalize_label(self._model._predict_normalized(self._transform(features)))
-        # return self._model._predict_normalized(self._transform(features))
+        return self._model._predict_normalized(self._transform(features))
 
     def loss(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        featuresArray = self._normalize_features(featuresArray)
-        expectedVals = self._normalize_labels(expectedVals)
         return self._model.loss(self._transform_mult(featuresArray), expectedVals)
 
     def toString(self):
@@ -49,19 +42,3 @@ class PolynomialRegression:
         if features.ndim == 1:
             features = features.reshape(1, -1)
         return np.hstack(self._transform_mult(features)).flatten()  # Flatten since we're dealing with a single sample
-
-    def _init_normalization_parameters(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
-        self._normCoefLabel = 1 / (np.max(expectedVals) - np.min(expectedVals))
-        self._normOffsetLabel = (-1) * np.min(expectedVals) * self._normCoefLabel
-
-        self._normCoefVector = 1 / (np.max(featuresArray, axis=0) - np.min(featuresArray, axis=0))
-        self._normOffsetVector = (-1) * np.min(featuresArray, axis=0) * self._normCoefVector
-
-    def _normalize_features(self, featuresArray: np.ndarray):
-        return featuresArray * self._normCoefVector + self._normOffsetVector
-
-    def _normalize_labels(self, labels):
-        return labels * self._normCoefLabel + self._normOffsetLabel
-
-    def _denormalize_label(self, label):
-        return (label - self._normOffsetLabel) / self._normCoefLabel
