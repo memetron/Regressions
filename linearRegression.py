@@ -1,12 +1,16 @@
+import random
+
 import numpy as np
 from normalization import Normalizer
 
 class LinearRegression:
-    def __init__(self, numFeatures: int, learningRate: float = 0.01):
+    MAX_ITERATIONS = 5000
+    def __init__(self, numFeatures: int, learningRate: float = 0.01, tolerance: float = 10**-4):
         self.w = np.zeros(numFeatures)
         self.b = 0
         self.learningRate = learningRate
         self.normalizer = Normalizer(numFeatures)
+        self.tolerance = tolerance
 
     def toString(self):
         return f"w = {self.w} b = {self.b}"
@@ -50,6 +54,7 @@ class LinearRegression:
             self.b = self.b - self.learningRate * db / num_rows
 
     def train_stochastic(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
+        iteration = 0
         self.normalizer.init_normalization_parameters(featuresArray, expectedVals)
         num_rows, num_cols = featuresArray.shape
         featuresArray = self.normalizer.normalize_features(featuresArray)
@@ -58,7 +63,7 @@ class LinearRegression:
             prev_w = self.w
             prev_b = self.b
 
-            for i in range(num_rows):
+            for i in np.random.permutation(num_rows):
                 currFeatures = featuresArray[i, :]
                 currExpected = expectedVals[i]
                 currPredicted = self._predict_normalized(currFeatures)
@@ -67,5 +72,7 @@ class LinearRegression:
                 self.w = self.w - self.learningRate * dw
                 self.b = self.b - self.learningRate * db
 
-            if abs(np.max(self.w - prev_w)) < (10 ** -10) and abs(self.b - prev_b) < (10 ** -10):
+            if (abs(np.max(self.w - prev_w)) < self.tolerance and abs(self.b - prev_b) < self.tolerance) or iteration > self.MAX_ITERATIONS:
                 break
+
+            iteration += 1
