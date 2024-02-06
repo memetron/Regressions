@@ -54,11 +54,18 @@ def test_linear(dimension: int, numData: int, noiseAmt:float = 0.1):
 
     start = time.time()
     model = LinearRegression(dimension)
-    model.train_batch(trainingFeatures, trainingLabels, 64)
+    model.train_batch(trainingFeatures, trainingLabels, 32)
+    print(f"Actual ({trainingFeatures[0]}, {trainingLabels[0]}), Predicted : ({trainingFeatures[0]}, {model.predict(trainingFeatures[0])})")
     print(f"batch 100 trained in {time.time() - start} seconds")
     print(f"model = ({model.toString()}), "
           f"e_training={model.loss(trainingFeatures, trainingLabels)}, "
           f"e_test={model.loss(testFeatures, testLabels)}")
+
+    plt.scatter(testFeatures, testLabels)
+    x_pred, y_pred = model.get_line(np.min(trainingFeatures), np.max(trainingFeatures))
+    plt.plot(x_pred, y_pred)
+    plt.show()
+
 
 def test_poly(dimension: int, degree: int, numData: int, noiseAmt:float = 0.1):
     model = PolynomialRegression(dimension, degree)
@@ -76,7 +83,7 @@ def test_poly(dimension: int, degree: int, numData: int, noiseAmt:float = 0.1):
 if __name__ == '__main__':
     print(f"Starting linear test . . .")
     start = time.time()
-    test_linear(5, 10000)
+    test_linear(1, 500)
     print(f"Linear test finished in {time.time() - start} seconds.")
 
 

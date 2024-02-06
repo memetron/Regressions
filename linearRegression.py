@@ -21,7 +21,7 @@ class LinearRegression:
     # denormalized prediction
     # returns a denormalized label given a denormalized features vector
     def predict(self, features: np.ndarray):
-        return self.normalizer.denormalize_label(self._predict_normalized(features))
+        return self.normalizer.denormalize_label(self._predict_normalized(self.normalizer.normalize_features(features)))
 
     # Gives a normalized prediction when fed a normalized features vector
     # Much faster than the denormalized predict, since no normalization occurs here
@@ -141,3 +141,7 @@ class LinearRegression:
                 break
 
             iteration += 1
+
+    def get_line(self, l, r):
+        x = np.linspace(l, r, 100).reshape(-1, 1)
+        return x, self.predict(x)
