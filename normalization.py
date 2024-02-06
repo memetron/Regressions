@@ -17,7 +17,13 @@ class Normalizer:
         self._normOffsetVector = (-1) *  np.min(featuresArray, axis=0) * self._normCoefVector
 
     def normalize_features(self, featuresArray: np.ndarray):
-        return featuresArray * self._normCoefVector + self._normOffsetVector
+        try:
+            return featuresArray * self._normCoefVector + self._normOffsetVector
+        except Exception as e:
+            print(f"featuresArray = {featuresArray.shape}\n\n"
+                  f"self._normCoefVector = {self._normCoefVector.shape}\n\n"
+                  f"self._normOffsetVector = {self._normOffsetVector.shape}\n\n")
+            raise e
 
     def normalize_labels(self, labels):
         return labels * self._normCoefLabel + self._normOffsetLabel

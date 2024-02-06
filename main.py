@@ -33,9 +33,10 @@ def gen_test_poly(dimension: int, degree: int, num_cases: int, noiseAmt: float):
     b = random.random() * 100 - 50
     features = np.empty(shape=(num_cases, dimension))
     labels = np.zeros(num_cases)
-    for i in range(num_cases):
-        features[i] = [random.random() * 10 - 5 for i in range(dimension)]
-        labels[i] = (features[i] ** degree).dot(w) + b
+    for j in range(0, degree + 1):
+        for i in range(num_cases):
+            features[i] = [random.random() * 10 - 5 for i in range(dimension)]
+            labels[i] += (features[i] ** j).dot(w) + b
     return (features, noise(labels, noiseAmt))
 
 # splits a set of data into a training and test set
@@ -79,6 +80,10 @@ def test_poly(dimension: int, degree: int, numData: int, noiseAmt:float = 0.1):
           f"e_training={model.loss(trainingFeatures, trainingLabels)}, "
           f"e_test={model.loss(testFeatures, testLabels)}")
 
+    plt.scatter(testFeatures, testLabels)
+    x_pred, y_pred = model.get_line(np.min(trainingFeatures), np.max(trainingFeatures))
+    plt.plot(x_pred, y_pred)
+    plt.show()
 
 if __name__ == '__main__':
     print(f"Starting linear test . . .")
@@ -89,5 +94,5 @@ if __name__ == '__main__':
 
     print(f"Starting polynomial test . . .")
     start = time.time()
-    test_poly(5, 2, 10000)
+    test_poly(1, 3, 500)
     print(f"polynomial test finished in {time.time() - start} seconds.")

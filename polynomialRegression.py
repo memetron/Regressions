@@ -19,7 +19,7 @@ class PolynomialRegression:
         self._model.train_batch(self._transform_mult(featuresArray), expectedVals, 128)
 
     def predict(self, features: np.ndarray):
-        return self._model._predict_normalized(self._transform(features))
+        return self._model.predict(self._transform_mult(features))
 
     def loss(self, featuresArray: np.ndarray, expectedVals: np.ndarray):
         return self._model.loss(self._transform_mult(featuresArray), expectedVals)
@@ -37,8 +37,6 @@ class PolynomialRegression:
                 transformed_features.append(new_feature)
         return np.hstack(transformed_features)
 
-    # performs a polynomial transform on a single feature vector
-    def _transform(self, features: np.ndarray):
-        if features.ndim == 1:
-            features = features.reshape(1, -1)
-        return np.hstack(self._transform_mult(features)).flatten()  # Flatten since we're dealing with a single sample
+    def get_line(self, l, r):
+        x = np.linspace(l, r, 100).reshape(-1, 1)
+        return x, self.predict(x)
